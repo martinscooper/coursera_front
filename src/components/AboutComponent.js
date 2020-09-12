@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 
 const RenderLeader = ({ id, name, image, designation, abbr, description }) => {
   return (
-    <Media tag="li">
+    <Media tag="li" id={id}>
       <Media object src={image} alt={name} />
       <Media body className="ml-5">
         <Media heading>{name}</Media>
