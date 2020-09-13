@@ -16,6 +16,7 @@ import {
 } from "reactstrap";
 import { Control, LocalForm, Errors } from "react-redux-form";
 import { Link } from "react-router-dom";
+import { Loading } from "./LoadingComponent";
 
 const required = (val) => val && val.length;
 const maxLength = (len) => (val) => !val || val.length <= len;
@@ -32,8 +33,13 @@ class CommentForm extends Component {
 
   handleSubmit(values) {
     console.log("Current State is: " + JSON.stringify(values));
-    alert("Current State is: " + JSON.stringify(values));
-    // event.preventDefault();
+    this.props.addComment(
+      this.props.dishId,
+      values.rating,
+      values.author,
+      values.comment
+    );
+    this.toggleModal();
   }
 
   toggleModal() {
@@ -64,11 +70,11 @@ class CommentForm extends Component {
                 </Control.select>
               </Row>
               <Row className="form-group">
-                <Label htmlFor="firstname">Your Name</Label>
+                <Label htmlFor="author">Your Name</Label>
                 <Control.text
-                  model=".name"
-                  id="name"
-                  name="name"
+                  model=".author"
+                  id="author"
+                  name="author"
                   placeholder="Your Name"
                   className="form-control"
                   validators={{
@@ -91,9 +97,9 @@ class CommentForm extends Component {
               <Row className="form-group">
                 <Label htmlFor="message">Comment</Label>
                 <Control.textarea
-                  model=".message"
-                  id="message"
-                  name="message"
+                  model=".comment"
+                  id="comment"
+                  name="comment"
                   rows="6"
                   className="form-control"
                 />
@@ -114,7 +120,7 @@ class CommentForm extends Component {
   }
 }
 
-function RenderComments({ comments }) {
+function RenderComments({ comments, addComment, dishId }) {
   return (
     <div>
       <h4>Comments</h4>
@@ -135,7 +141,7 @@ function RenderComments({ comments }) {
           );
         })}
       </ul>
-      <CommentForm />
+      <CommentForm dishId={dishId} addComment={addComment} />
     </div>
   );
 }
@@ -154,26 +160,48 @@ function RenderDish({ dish }) {
 
 const DishDetail = (props) => {
   return (
-    <div className="container">
-      <Breadcrumb>
-        <BreadcrumbItem>
-          <Link to="/menu">Menu</Link>
-        </BreadcrumbItem>
-        <BreadcrumbItem active>{props.dish.name}</BreadcrumbItem>
-      </Breadcrumb>
-      <div className="col-12">
-        <h3>{props.dish.name}</h3>
-        <hr />
-      </div>
-      <div className="row">
-        <div className="col-12 col-md-5 m-1">
-          <RenderDish dish={props.dish} />
+    <>
+      {props.isLoading ? (
+        <div className="container">
+          <div className="row">
+            <Loading />
+          </div>
         </div>
-        <div className="col-12 col-md-5 m-1">
-          <RenderComments comments={props.comments} />
+      ) : props.errMess ? (
+        <div className="container">
+          <div className="row">
+            <h4>{props.errMess}</h4>
+          </div>
         </div>
-      </div>
-    </div>
+      ) : props.dish ? (
+        <div className="container">
+          <Breadcrumb>
+            <BreadcrumbItem>
+              <Link to="/menu">Menu</Link>
+            </BreadcrumbItem>
+            <BreadcrumbItem active>{props.dish.name}</BreadcrumbItem>
+          </Breadcrumb>
+          <div className="col-12">
+            <h3>{props.dish.name}</h3>
+            <hr />
+          </div>
+          <div className="row">
+            <div className="col-12 col-md-5 m-1">
+              <RenderDish dish={props.dish} />
+            </div>
+            <div className="col-12 col-md-5 m-1">
+              <RenderComments
+                comments={props.comments}
+                addComment={props.addComment}
+                dishId={props.dish.id}
+              />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div></div>
+      )}
+    </>
   );
 };
 
